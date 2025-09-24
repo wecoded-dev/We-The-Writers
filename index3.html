@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>We The Writer - Sketchy Blog</title>
+    
+    <!-- Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rough.js@4.5.2/bundled/rough.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.17/paper-full.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-brown: #8B4513;
+            --light-brown: #D2B48C;
+            --dark-brown: #5D4037;
+            --accent-pink: #FFB6C1;
+            --white: #FFF8F0;
+            --black: #2C1810;
+            --sketch-stroke: 2px;
+            --transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--white);
+            color: var(--black);
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .sketchy-text {
+            font-family: 'Caveat', cursive;
+            position: relative;
+        }
+        
+        /* Sketchy borders and elements */
+        .sketchy-border {
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            box-shadow: 5px 5px 0px var(--accent-pink);
+            position: relative;
+            background: var(--white);
+        }
+        
+        .sketchy-bg {
+            background-color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sketchy-bg::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: var(--sketch-stroke) dashed var(--primary-brown);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            pointer-events: none;
+            z-index: -1;
+            animation: sketchyPulse 8s infinite alternate;
+        }
+        
+        @keyframes sketchyPulse {
+            0% { opacity: 0.3; transform: translate(0, 0) rotate(0deg); }
+            100% { opacity: 0.7; transform: translate(5px, 5px) rotate(1deg); }
+        }
+        
+        /* Particles container */
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -2;
+        }
+        
+        /* Three.js container */
+        #three-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        /* Paper.js canvas */
+        #sketch-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background-color: var(--white);
+            padding: 1rem 0;
+            border-bottom: var(--sketch-stroke) dashed var(--primary-brown);
+            transition: var(--transition);
+            z-index: 1000;
+        }
+        
+        .navbar.scrolled {
+            background-color: rgba(255, 248, 240, 0.95);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-family: 'Caveat', cursive;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-brown);
+            position: relative;
+        }
+        
+        .navbar-brand::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-pink);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .navbar-brand:hover::after {
+            transform: scaleX(1);
+        }
+        
+        .nav-link {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            color: var(--dark-brown);
+            margin: 0 10px;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-pink);
+            transition: width 0.5s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-brown);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 100px 0;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            z-index: 1;
+            position: relative;
+        }
+        
+        .hero h1 {
+            font-family: 'Caveat', cursive;
+            font-size: 6rem;
+            font-weight: 700;
+            color: var(--primary-brown);
+            margin-bottom: 1rem;
+            text-shadow: 3px 3px 0 var(--accent-pink);
+            line-height: 1.1;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .hero h1::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 3px dashed var(--primary-brown);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0.5;
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--dark-brown);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .btn-sketchy {
+            background-color: var(--primary-brown);
+            color: var(--white);
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 12px 35px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            font-weight: 700;
+            transition: var(--transition);
+            box-shadow: 5px 5px 0px var(--accent-pink);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn-sketchy::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.7s ease;
+            z-index: -1;
+        }
+        
+        .btn-sketchy:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 8px 8px 0px var(--accent-pink);
+            color: var(--white);
+        }
+        
+        .btn-sketchy:hover::before {
+            left: 100%;
+        }
+        
+        /* Section Styles */
+        section {
+            padding: 120px 0;
+            position: relative;
+        }
+        
+        .section-title {
+            font-family: 'Caveat', cursive;
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary-brown);
+            text-align: center;
+            margin-bottom: 4rem;
+            text-shadow: 2px 2px 0 var(--accent-pink);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            width: 80%;
+            height: 4px;
+            background: var(--light-brown);
+            border-radius: 2px;
+        }
+        
+        /* About Section */
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+        }
+        
+        .about-text {
+            flex: 1;
+            position: relative;
+        }
+        
+        .about-text p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .about-text p::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent-pink);
+            font-size: 1.5rem;
+        }
+        
+        .about-image {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        
+        .about-image img {
+            max-width: 100%;
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            box-shadow: 15px 15px 0px var(--accent-pink);
+            transition: var(--transition);
+        }
+        
+        .about-image img:hover {
+            transform: rotate(-2deg) scale(1.02);
+            box-shadow: 20px 20px 0px var(--accent-pink);
+        }
+        
+        /* Categories Section */
+        .category-card {
+            background-color: var(--white);
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 2.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            transition: var(--transition);
+            box-shadow: 5px 5px 0px var(--light-brown);
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .category-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--accent-pink);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-10px) rotate(1deg);
+            box-shadow: 10px 10px 0px var(--accent-pink);
+        }
+        
+        .category-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .category-icon {
+            font-size: 3.5rem;
+            color: var(--primary-brown);
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .category-card:hover .category-icon {
+            transform: scale(1.2) rotate(10deg);
+            color: var(--accent-pink);
+        }
+        
+        .category-card h3 {
+            font-family: 'Caveat', cursive;
+            font-size: 2.2rem;
+            color: var(--dark-brown);
+            margin-bottom: 1rem;
+        }
+        
+        /* Testimonials */
+        .testimonial-card {
+            background-color: var(--white);
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 2.5rem;
+            margin: 1rem;
+            box-shadow: 5px 5px 0px var(--light-brown);
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 8px 8px 0px var(--accent-pink);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .testimonial-text::before {
+            content: """;
+            font-size: 5rem;
+            color: var(--accent-pink);
+            position: absolute;
+            left: -1.5rem;
+            top: -1.5rem;
+            font-family: Georgia, serif;
+            opacity: 0.7;
+        }
+        
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--primary-brown);
+            font-size: 1.2rem;
+        }
+        
+        /* Challenges Section */
+        .challenge-item {
+            background-color: var(--white);
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 5px 5px 0px var(--light-brown);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .challenge-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 40px 40px 0;
+            border-color: transparent var(--accent-pink) transparent transparent;
+            transition: var(--transition);
+        }
+        
+        .challenge-item:hover {
+            transform: translateX(10px);
+            box-shadow: 10px 10px 0px var(--accent-pink);
+        }
+        
+        .challenge-item:hover::after {
+            border-width: 0 60px 60px 0;
+        }
+        
+        .challenge-title {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            color: var(--primary-brown);
+            margin-bottom: 1rem;
+        }
+        
+        /* Contact Form */
+        .contact-form {
+            background-color: var(--white);
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 3rem;
+            box-shadow: 10px 10px 0px var(--accent-pink);
+            position: relative;
+        }
+        
+        .contact-form::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px dashed var(--primary-brown);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            z-index: -1;
+            animation: sketchyPulse 5s infinite alternate;
+        }
+        
+        .form-control {
+            border: var(--sketch-stroke) solid var(--black);
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            padding: 0.75rem 1.5rem;
+            margin-bottom: 1.5rem;
+            background-color: var(--white);
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(139, 69, 19, 0.25);
+            border-color: var(--primary-brown);
+            transform: translateY(-3px);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark-brown);
+            color: var(--white);
+            padding: 4rem 0 2rem;
+            text-align: center;
+            border-top: var(--sketch-stroke) dashed var(--light-brown);
+            position: relative;
+        }
+        
+        footer::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-pink), var(--primary-brown), var(--accent-pink));
+        }
+        
+        .footer-links a {
+            color: var(--white);
+            margin: 0 15px;
+            text-decoration: none;
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .footer-links a::after {
+            content: "";
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-pink);
+            transition: width 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-pink);
+            transform: translateY(-3px);
+        }
+        
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            transition: var(--transition);
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-5px) scale(1.2);
+            color: var(--accent-pink) !important;
+        }
+        
+        /* Floating elements */
+        .floating-element {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 4rem;
+            }
+            
+            .about-content {
+                flex-direction: column;
+            }
+            
+            .section-title {
+                font-size: 3rem;
+            }
+            
+            .category-card {
+                padding: 1.5rem;
+            }
+        }
+        
+        /* Animation classes */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .sketch-line {
+            position: absolute;
+            background-color: var(--black);
+            height: 2px;
+            transform-origin: left;
+        }
+        
+        /* Loading animation */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 5px dashed var(--primary-brown);
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            position: relative;
+        }
+        
+        .loader::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 5px dashed var(--accent-pink);
+            border-radius: 50%;
+            animation: spinReverse 3s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes spinReverse {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loader"></div>
+    </div>
+    
+    <!-- Paper.js Canvas for Sketchy Effects -->
+    <canvas id="sketch-canvas"></canvas>
+    
+    <!-- Three.js Container -->
+    <div id="three-container"></div>
+    
+    <!-- Particles.js Container -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand sketchy-text" href="#">We The Writer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#categories">Categories</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#testimonials">Testimonials</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#challenges">Challenges</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section id="home" class="hero sketchy-bg">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 hero-content">
+                    <h1 class="sketchy-text">We The Writer</h1>
+                    <p>Where words come to life in the most sketchy, creative, and beautiful way. Join our community of passionate writers and unleash your creativity.</p>
+                    <div class="mt-4">
+                        <a href="#about" class="btn btn-sketchy me-3">Explore Our World</a>
+                        <a href="#contact" class="btn btn-sketchy">Join Today</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://cdn.pixabay.com/photo/2017/08/06/22/01/books-2596809_1280.jpg" alt="Writing Illustration" class="img-fluid sketchy-border" style="box-shadow: 15px 15px 0px var(--accent-pink);">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About Us</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>Welcome to "We The Writer", a creative sanctuary for wordsmiths, storytellers, and thinkers. Our platform celebrates the raw, unpolished beauty of writing in its most authentic form.</p>
+                    <p>We believe that the best stories often come with rough edges, sketchy outlines, and the beautiful imperfections that make them uniquely human. Our community thrives on creativity, collaboration, and the shared passion for the written word.</p>
+                    <p>Join us as we explore the depths of imagination, challenge conventional narratives, and create something truly extraordinary together.</p>
+                    <div class="mt-4">
+                        <a href="#categories" class="btn btn-sketchy">Discover Categories</a>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="https://cdn.pixabay.com/photo/2015/07/02/10/27/typewriter-828946_1280.jpg" alt="About Us">
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Categories Section -->
+    <section id="categories" class="sketchy-bg">
+        <div class="container">
+            <h2 class="section-title">Our Writing Categories</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="category-card fade-in">
+                        <div class="category-icon">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <h3>Coding</h3>
+                        <p>Explore the art of programming through compelling narratives and technical insights that make complex concepts accessible.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="category-card fade-in">
+                        <div class="category-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Business</h3>
+                        <p>Dive into the world of entrepreneurship, strategy, and corporate storytelling with practical insights.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="category-card fade-in">
+                        <div class="category-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Lifestyle</h3>
+                        <p>Discover stories about wellness, travel, relationships, and everyday adventures that inspire.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="category-card fade-in">
+                        <div class="category-icon">
+                            <i class="fab fa-bitcoin"></i>
+                        </div>
+                        <h3>Crypto</h3>
+                        <p>Navigate the complex world of blockchain, NFTs, and digital currencies with clarity and insight.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="category-card fade-in">
+                        <div class="category-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h3>Finance</h3>
+                        <p>Understand money, investments, and economic trends through engaging narratives and analysis.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="category-card fade-in">
+                        <div class="category-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3>Stories</h3>
+                        <p>Immerse yourself in fiction, memoirs, and creative non-fiction from talented writers worldwide.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials Section -->
+    <section id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Writers Say</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="testimonial-card fade-in">
+                        <p class="testimonial-text">"We The Writer has transformed my approach to storytelling. The sketchy aesthetic inspires raw, authentic writing that feels truly human."</p>
+                        <p class="testimonial-author">- Sarah J., Fiction Writer</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card fade-in">
+                        <p class="testimonial-text">"The community here is incredible. I've grown so much as a writer through the challenges and feedback from fellow creators."</p>
+                        <p class="testimonial-author">- Michael T., Tech Blogger</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="testimonial-card fade-in">
+                        <p class="testimonial-text">"This platform celebrates imperfection, which has given me the courage to share my work without over-editing. It's liberating!"</p>
+                        <p class="testimonial-author">- Elena R., Poet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Become Author Section -->
+    <section id="become-author" class="sketchy-bg">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://cdn.pixabay.com/photo/2018/01/17/07/06/laptop-3087585_1280.jpg" alt="Become an Author" class="img-fluid sketchy-border" style="box-shadow: 15px 15px 0px var(--accent-pink);">
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="section-title text-start">Become an Author</h2>
+                    <p>Join our community of passionate writers and share your unique voice with the world. We welcome writers of all levels and backgrounds.</p>
+                    <p>As an author with "We The Writer", you'll receive:</p>
+                    <ul class="mb-4">
+                        <li>Personalized feedback on your work from experienced editors</li>
+                        <li>Access to exclusive writing challenges and prompts</li>
+                        <li>Opportunities to collaborate with other talented writers</li>
+                        <li>A platform to build your audience and showcase your work</li>
+                        <li>Monthly featured author spotlights</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-sketchy">Join Us Today</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Challenges Section -->
+    <section id="challenges">
+        <div class="container">
+            <h2 class="section-title">Writing Challenges</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="challenge-item fade-in">
+                        <h3 class="challenge-title">Sketchy Story Sprint</h3>
+                        <p>Write a 1000-word story in 24 hours based on a random prompt. Embrace imperfection and let your creativity flow without overthinking.</p>
+                        <p><strong>Deadline:</strong> Every Friday at 6 PM EST | <strong>Prize:</strong> Featured publication + $100</p>
+                    </div>
+                    <div class="challenge-item fade-in">
+                        <h3 class="challenge-title">Poetry in Motion</h3>
+                        <p>Create a poem that incorporates movement, change, or transformation. Any style, any length - just make it move.</p>
+                        <p><strong>Deadline:</strong> Monthly, last day of each month | <strong>Prize:</strong> Featured publication</p>
+                    </div>
+                    <div class="challenge-item fade-in">
+                        <h3 class="challenge-title">Tech Tales</h3>
+                        <p>Explain a complex technical concept through a compelling narrative. Make coding accessible through storytelling.</p>
+                        <p><strong>Deadline:</strong> Bi-weekly on Wednesdays | <strong>Prize:</strong> $150 + expert feedback</p>
+                    </div>
+                    <div class="challenge-item fade-in">
+                        <h3 class="challenge-title">Character Sketch</h3>
+                        <p>Develop a character in 500 words or less. Focus on their quirks, imperfections, and what makes them uniquely human.</p>
+                        <p><strong>Ongoing:</strong> Submit anytime | <strong>Prize:</strong> Community recognition</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Contact Section -->
+    <section id="contact" class="sketchy-bg">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <form class="contact-form" id="contact-form">
+                        <input type="hidden" name="access_key" value="YOUR_ACCESS_KEY_HERE">
+                        <input type="hidden" name="subject" value="New Contact Form Submission">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="name" placeholder="Your Name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" class="form-control" name="email" placeholder="Your Email" required>
+                            </div>
+                        </div>
+                        <input type="text" class="form-control" name="interest" placeholder="Your Interest (Writing Category)" required>
+                        <textarea class="form-control" name="message" rows="5" placeholder="Your Message" required></textarea>
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-sketchy btn-lg">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <h3 class="sketchy-text" style="font-size: 2.5rem; margin-bottom: 1rem;">We The Writer</h3>
+            <p>Where words find their sketchy, beautiful home.</p>
+            <div class="footer-links mt-4">
+                <a href="#home">Home</a>
+                <a href="#about">About</a>
+                <a href="#categories">Categories</a>
+                <a href="#challenges">Challenges</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="social-links mt-4">
+                <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-2x"></i></a>
+                <a href="#" class="text-white me-3"><i class="fab fa-instagram fa-2x"></i></a>
+                <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-2x"></i></a>
+                <a href="#" class="text-white"><i class="fab fa-linkedin fa-2x"></i></a>
+            </div>
+            <p class="mt-4">&copy; 2023 We The Writer. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Wait for the page to fully load
+        window.addEventListener('load', function() {
+            // Hide loading screen
+            setTimeout(function() {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(function() {
+                    document.getElementById('loading').style.display = 'none';
+                }, 500);
+            }, 1500);
+            
+            // Initialize all effects and animations
+            initEffects();
+        });
+        
+        function initEffects() {
+            // Initialize Lenis for smooth scrolling
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical',
+                gestureDirection: 'vertical',
+                smooth: true,
+                smoothTouch: false,
+                touchMultiplier: 2,
+            });
+            
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            
+            requestAnimationFrame(raf);
+            
+            // Navbar scroll effect
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    document.querySelector('.navbar').classList.add('scrolled');
+                } else {
+                    document.querySelector('.navbar').classList.remove('scrolled');
+                }
+            });
+            
+            // Initialize Particles.js
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 100, density: { enable: true, value_area: 800 } },
+                    color: { value: "#8B4513" },
+                    shape: { 
+                        type: "circle",
+                        stroke: { width: 1, color: "#FFB6C1" }
+                    },
+                    opacity: { value: 0.5, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1 } },
+                    size: { value: 4, random: true, anim: { enable: true, speed: 2, size_min: 0.1 } },
+                    line_linked: {
+                        enable: true,
+                        distance: 150,
+                        color: "#FFB6C1",
+                        opacity: 0.4,
+                        width: 1
+                    },
+                    move: {
+                        enable: true,
+                        speed: 2,
+                        direction: "none",
+                        random: true,
+                        straight: false,
+                        out_mode: "out",
+                        bounce: false,
+                        attract: { enable: true, rotateX: 600, rotateY: 1200 }
+                    }
+                },
+                interactivity: {
+                    detect_on: "canvas",
+                    events: {
+                        onhover: { enable: true, mode: "repulse" },
+                        onclick: { enable: true, mode: "push" },
+                        resize: true
+                    }
+                }
+            });
+            
+            // Three.js Scene
+            let scene, camera, renderer, objects = [];
+            
+            function initThreeJS() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setClearColor(0x000000, 0);
+                document.getElementById('three-container').appendChild(renderer.domElement);
+                
+                // Create sketchy-looking geometric objects
+                const geometries = [
+                    new THREE.BoxGeometry(1, 1, 1),
+                    new THREE.SphereGeometry(0.7, 12, 8),
+                    new THREE.ConeGeometry(0.6, 1.5, 8),
+                    new THREE.TorusGeometry(0.8, 0.3, 12, 18)
+                ];
+                
+                for (let i = 0; i < 15; i++) {
+                    const geometry = geometries[Math.floor(Math.random() * geometries.length)];
+                    const material = new THREE.MeshBasicMaterial({ 
+                        color: Math.random() > 0.5 ? 0x8B4513 : 0xFFB6C1,
+                        wireframe: true,
+                        wireframeLinewidth: 1
+                    });
+                    
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.x = Math.random() * 30 - 15;
+                    mesh.position.y = Math.random() * 30 - 15;
+                    mesh.position.z = Math.random() * 20 - 10;
+                    mesh.rotation.x = Math.random() * Math.PI;
+                    mesh.rotation.y = Math.random() * Math.PI;
+                    scene.add(mesh);
+                    objects.push(mesh);
+                }
+                
+                // Add some lines for sketchy effect
+                const lineMaterial = new THREE.LineBasicMaterial({ color: 0x5D4037 });
+                for (let i = 0; i < 20; i++) {
+                    const points = [];
+                    points.push(new THREE.Vector3(
+                        Math.random() * 40 - 20,
+                        Math.random() * 40 - 20,
+                        Math.random() * 20 - 10
+                    ));
+                    points.push(new THREE.Vector3(
+                        Math.random() * 40 - 20,
+                        Math.random() * 40 - 20,
+                        Math.random() * 20 - 10
+                    ));
+                    
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.Line(geometry, lineMaterial);
+                    scene.add(line);
+                    objects.push(line);
+                }
+                
+                camera.position.z = 15;
+                
+                // Animation
+                function animate() {
+                    requestAnimationFrame(animate);
+                    
+                    objects.forEach(obj => {
+                        if (obj.rotation) {
+                            obj.rotation.x += 0.005;
+                            obj.rotation.y += 0.002;
+                        }
+                    });
+                    
+                    renderer.render(scene, camera);
+                }
+                
+                animate();
+                
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            // Initialize Three.js
+            initThreeJS();
+            
+            // Paper.js for sketchy effects
+            paper.install(window);
+            paper.setup(document.getElementById('sketch-canvas'));
+            
+            // Create sketchy lines that follow mouse
+            let tool = new Tool();
+            let sketchLines = [];
+            
+            tool.onMouseMove = function(event) {
+                // Occasionally add a new sketch line
+                if (Math.random() > 0.97) {
+                    let path = new Path({
+                        strokeColor: {
+                            hue: Math.random() * 30 + 10, // Brown hues
+                            saturation: 0.7,
+                            brightness: 0.5
+                        },
+                        strokeWidth: Math.random() * 2 + 0.5,
+                        strokeCap: 'round',
+                        opacity: 0.1
+                    });
+                    
+                    // Start point slightly randomized around mouse
+                    path.add(event.point + new Point(
+                        Math.random() * 20 - 10,
+                        Math.random() * 20 - 10
+                    ));
+                    
+                    // End point further randomized
+                    path.add(event.point + new Point(
+                        Math.random() * 100 - 50,
+                        Math.random() * 100 - 50
+                    ));
+                    
+                    sketchLines.push(path);
+                    
+                    // Limit number of lines
+                    if (sketchLines.length > 50) {
+                        sketchLines[0].remove();
+                        sketchLines.shift();
+                    }
+                }
+            };
+            
+            // Animate sketch lines
+            view.onFrame = function(event) {
+                sketchLines.forEach(function(path, index) {
+                    path.opacity *= 0.99; // Fade out slowly
+                    if (path.opacity < 0.01) {
+                        path.remove();
+                        sketchLines.splice(index, 1);
+                    }
+                });
+            };
+            
+            // Scroll animations with GSAP
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Fade in elements on scroll
+            gsap.utils.toArray('.fade-in').forEach(element => {
+                gsap.fromTo(element, {
+                    opacity: 0,
+                    y: 80,
+                    rotation: -2
+                }, {
+                    opacity: 1,
+                    y: 0,
+                    rotation: 0,
+                    duration: 1.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: 'top 85%',
+                        end: 'bottom 20%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+            
+            // Animate section titles
+            gsap.utils.toArray('.section-title').forEach(title => {
+                gsap.fromTo(title, {
+                    scale: 0.8,
+                    rotation: -5
+                }, {
+                    scale: 1,
+                    rotation: 0,
+                    duration: 1,
+                    scrollTrigger: {
+                        trigger: title,
+                        start: 'top 80%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+            
+            // Sketchy border animations with anime.js
+            anime({
+                targets: '.sketchy-border',
+                translateX: function() {
+                    return anime.random(-3, 3);
+                },
+                translateY: function() {
+                    return anime.random(-3, 3);
+                },
+                rotate: function() {
+                    return anime.random(-1, 1);
+                },
+                easing: 'easeInOutQuad',
+                duration: 3000,
+                direction: 'alternate',
+                loop: true
+            });
+            
+            // Button hover effects
+            document.querySelectorAll('.btn-sketchy').forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    anime({
+                        targets: this,
+                        scale: 1.05,
+                        duration: 300,
+                        easing: 'easeOutElastic(1, .5)'
+                    });
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    anime({
+                        targets: this,
+                        scale: 1,
+                        duration: 300,
+                        easing: 'easeOutElastic(1, .5)'
+                    });
+                });
+            });
+            
+            // Add sketchy effect to text with Rough.js
+            if (typeof Rough !== 'undefined') {
+                const rough = Rough;
+                const sketchyTexts = document.querySelectorAll('.sketchy-text');
+                
+                sketchyTexts.forEach(text => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const rect = text.getBoundingClientRect();
+                    
+                    canvas.width = rect.width * 2;
+                    canvas.height = rect.height * 2;
+                    
+                    const rc = rough.canvas(canvas);
+                    rc.rectangle(10, 10, rect.width*2-20, rect.height*2-20, {
+                        roughness: 2.5,
+                        fill: getComputedStyle(text).color,
+                        stroke: 'black',
+                        strokeWidth: 1,
+                        fillWeight: 3
+                    });
+                    
+                    text.style.backgroundImage = `url(${canvas.toDataURL()})`;
+                    text.style.webkitBackgroundClip = 'text';
+                    text.style.backgroundClip = 'text';
+                    text.style.color = 'transparent';
+                    text.style.backgroundSize = '100% 100%';
+                });
+            }
+            
+            // Contact form submission
+            $('#contact-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                // In a real implementation, you would use Web3Forms here
+                // This is a simplified version for demonstration
+                const formData = $(this).serialize();
+                const submitBtn = $(this).find('button[type="submit"]');
+                
+                // Simulate form submission
+                submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Sending...');
+                submitBtn.prop('disabled', true);
+                
+                setTimeout(() => {
+                    submitBtn.html('<i class="fas fa-check"></i> Message Sent!');
+                    submitBtn.addClass('btn-success');
+                    $('#contact-form')[0].reset();
+                    
+                    setTimeout(() => {
+                        submitBtn.html('Send Message');
+                        submitBtn.removeClass('btn-success');
+                        submitBtn.prop('disabled', false);
+                    }, 3000);
+                }, 2000);
+            });
+            
+            // Add floating elements for extra sketchiness
+            addFloatingElements();
+            
+            function addFloatingElements() {
+                const floatingIcons = ['✏️', '📝', '📖', '✒️', '📚', '🖋️'];
+                const colors = ['#8B4513', '#5D4037', '#FFB6C1', '#D2B48C'];
+                
+                for (let i = 0; i < 15; i++) {
+                    const element = document.createElement('div');
+                    element.className = 'floating-element';
+                    element.innerHTML = floatingIcons[Math.floor(Math.random() * floatingIcons.length)];
+                    element.style.fontSize = (Math.random() * 30 + 20) + 'px';
+                    element.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    element.style.left = Math.random() * 100 + 'vw';
+                    element.style.top = Math.random() * 100 + 'vh';
+                    element.style.opacity = Math.random() * 0.1 + 0.05;
+                    document.body.appendChild(element);
+                    
+                    // Animate floating
+                    anime({
+                        targets: element,
+                        translateX: function() {
+                            return anime.random(-100, 100);
+                        },
+                        translateY: function() {
+                            return anime.random(-50, 50);
+                        },
+                        rotate: function() {
+                            return anime.random(-180, 180);
+                        },
+                        duration: function() {
+                            return anime.random(10000, 30000);
+                        },
+                        easing: 'easeInOutQuad',
+                        direction: 'alternate',
+                        loop: true
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
